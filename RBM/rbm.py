@@ -1,8 +1,9 @@
 import os, struct, sys
-from PIL import Image
+import image
 from scipy import signal
 from array import array as pyarray
 from time import sleep
+import matplotlib as plt
 from pylab import *
 from numpy import *
 
@@ -37,7 +38,7 @@ def drop_activation( x ):
     return logis, logis > random.rand( x.shape[ 0 ], x.shape[ 1 ] )
 
 def load_mnist( dataset = "training", digits = arange( 10 ),
-                path = "/Users/Sam/Documents/eecs598/rbm_py/" ):
+                path = "/Users/Sam/Documents/rbm-whitepaper/RBM" ):
     """
     Loads MNIST files into 3D numpy arrays
 
@@ -78,13 +79,14 @@ def load_mnist( dataset = "training", digits = arange( 10 ),
        
 num_visible = 784
 num_hidden = 1000
-batch = 600
+batch = 6000
 set_size = 60000
 size = 28
 num_case = set_size / batch
 rate = 0.0025
 pbias_lambda = 5
 l2 = 0.01
+epoch = 10
 max_epoch_1 = 10
 max_epoch_2 = 10
 init_mom = 0.5
@@ -107,8 +109,8 @@ for i in range( num_visible ):
  
 print( "training standard rbm" )
 if not max_epoch_1: print( "haha not, crbm cooler" )       
-for i in range( max_epoch_1 ):
-   for tr_batch in range( set_size / batch ):
+for i in range(10):
+   for tr_batch in range( set_size // batch ):
         print( "epoch ", i, " batch ", tr_batch ) 
         momentum = 0
         
@@ -139,8 +141,7 @@ for i in range( max_epoch_1 ):
         
         
         #display example/reconstructions
-        if( ( tr_batch == ( set_size / batch - 1 ) and epoch == 5 ) or ( tr_batch == 0 and epoch == 0 )
-            ( tr_batch == ( set_size / batch - 1 ) and epoch == 9 ) ):
+        if(epoch == 9):
             fig = figure()
             for f in range( 8 ):
                 a = fig.add_subplot( 8, 2, 2 * f + 1 )
@@ -171,8 +172,8 @@ hb_grad_conv = zeros( ( num_maps, size_maps, size_maps ) )
 vb_grad_conv = zeros( ( size_image, size_image ) )
 
 for epoch in range( max_epoch_2 ):
-    for tr_batch in range( set_size / batch ):
-        print "CRBM training epoch ", epoch, "batch number ", tr_batch
+    for tr_batch in range( set_size // batch ):
+        print( "CRBM training epoch ", epoch, "batch number ", tr_batch)
         #should I still make the input units stochastic?
         new_im = images_conv[ batch * tr_batch : batch * ( 1 + tr_batch ), :, : ] / 255.0
         data = new_im > rand( batch, size_image, size_image )
@@ -234,22 +235,20 @@ for epoch in range( max_epoch_2 ):
         
         print( "train error: ", abs( data - recon_act ).sum() )
         #display example/reconstructions
-        if( ( tr_batch == ( set_size / batch - 1 ) and epoch == 5 ) or ( tr_batch == 0 and epoch == 0 )
-            ( tr_batch == ( set_size / batch - 1 ) and epoch == 9 ) ):
-            fig = figure()
+        if(epoch == 2):
+            fig = plt.figure()
             for f in range( 8 ):
                 a = fig.add_subplot( 8, 2, 2 * f + 1 )
                 imshow( data[ f, :, : ], cmap = cm.gray )
                 a = fig.add_subplot( 8, 2, 2 * f + 2 )
                 imshow( recon_act[ f, :, : ], cmap = cm.gray )
-            show()
+            plt.show()
         #display feature maps
-        if( ( tr_batch == ( set_size / batch - 1 ) and epoch == 9 ) ):
-            #print feature_maps[ 0, :, : ]
-            fig2 = figure()
+        if(epoch == 2):
+            fig2 = plt.figure()
             for f in range( 40 ):
                 a = fig2.add_subplot( 5, 8, f + 1 )
                 imshow( feature_maps[ f, :, : ], cmap = cm.gray )
-            show()
+            plt.show()
         #print( hidden_probs.mean() )         
  
